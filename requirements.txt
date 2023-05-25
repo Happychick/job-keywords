@@ -1,0 +1,11 @@
+Flask==2.1.0
+requests==2.25.1
+requests-oauthlib==1.3.0
+google-search-results
+seaborn
+matplotlib
+gensim
+nltk
+spacy>=3.0.0,<4.0.0
+google-cloud-storage
+en_core_web_sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.4.0/en_core_web_sm-3.4.0-py3-none-any.whl
