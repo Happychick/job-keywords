@@ -1,0 +1,91 @@
+.form-block {
+  margin-top: 40px;
+}
+
+.submit_button {
+  border-radius: 5px;
+  font-family: Inconsolata, monospace;
+  font-size: 20px;
+}
+
+.form_text {
+  padding-bottom: 10px;
+  font-family: Inconsolata, monospace;
+  font-size: 20px;
+}
+
+.form_input {
+  max-width: 100%;
+  border-radius: 5px;
+}
+
+.center_block {
+  justify-content: flex-start;
+  align-items: stretch;
+  display: flex;
+}
+
+.html-embed {
+  max-width: 100px;
+}
+
+.hmtl-embed-site {
+  min-height: 200px;
+  min-width: 20px;
+}
+
+@media screen and (max-width: 991px) {
+  .form_text {
+    margin-bottom: 10px;
+    padding-bottom: 0;
+  }
+
+  .center_block {
+    flex-direction: column;
+    align-items: flex-start;
+    display: flex;
+  }
+}
+
+@media screen and (max-width: 767px) {
+  .container {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+}
+
+@media screen and (max-width: 479px) {
+  .submit_button {
+    text-align: left;
+  }
+
+  .form_text {
+    text-transform: none;
+    font-family: Inconsolata, monospace;
+  }
+
+  .container {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .form {
+    flex-flow: wrap;
+    justify-content: center;
+    align-items: center;
+    display: block;
+  }
+
+  .center_block {
+    align-items: center;
+  }
+}
+
+
+@font-face {
+  font-family: 'Trade gothic lt';
+  src: url('../fonts/Trade-Gothic-LT-Bold-Oblique.ttf') format('truetype');
+  font-weight: 700;
+  font-style: italic;
+  font-display: swap;
+}
