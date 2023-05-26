@@ -76,34 +76,44 @@
         crossorigin="anonymous"></script>
 <script type="text/javascript">
     $(document).ready(function () {
+        // make sure the spinner is hidden when the page loads
         $(".w-lightbox-spinner").hide();
+
+        // when the form is submitted
         $('#email-form').submit(function () {
-            console.log("Form submitted");
+            // show the spinner
             $(".w-lightbox-spinner").show();
+
+            // make the API call
             $.ajax({
-                url: "http://127.0.0.1:8000/search/tasks",
+                url: "https://job-keywords.khremin.com/search/tasks",
                 method: "POST",
                 context: document.body,
                 contentType: "application/json",
                 data: JSON.stringify({
-                    "searchToken": $('#name-2').val()
+                    "searchToken": $('#name-2').val() // Grab the value from the input field
                 })
-            }).done(function (data) {
+            }).done(function (data) { // if request is successful
+                // show the image from response
                 $("#imageElement").show();
                 $("#imageElement").attr("src", data.imageUrl);
+
                 console.log("Skills found", data.skills);
+
+                // show/hide the container with the "no items found" message
                 if (data.skills.length) {
                     $("#empty-div").hide();
                 } else {
                     $("#empty-div").show();
                 }
-            }).fail(function (data) {
+            }).fail(function (data) { // if request fails
                 console.log("error", data);
                 $("#imageElement").hide();
-            }).always(function () {
-                $(".w-lightbox-spinner").hide();
+            }).always(function () { // this function will always be executed
+                $(".w-lightbox-spinner").hide(); // hide the spinner
             });
-            return false;
+
+            return false; // prevent the form from submitting
         });
     });
 </script>
