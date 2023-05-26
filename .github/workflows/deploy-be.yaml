@@ -1,0 +1,11 @@
+name: 'Deploy BE'
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy-fe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3

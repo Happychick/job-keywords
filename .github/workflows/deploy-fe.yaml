@@ -1,10 +1,10 @@
-name: 'Deploy'
+name: 'Deploy FE'
 
 on:
   workflow_dispatch:
 
 jobs:
-  check-links:
+  deploy-fe:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
