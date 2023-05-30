@@ -1,3 +1,17 @@
+.w-layout-grid {
+  grid-row-gap: 16px;
+  grid-column-gap: 16px;
+  grid-template-rows: auto auto;
+  grid-template-columns: 1fr 1fr;
+  grid-auto-columns: 1fr;
+  display: grid;
+}
+
+strong {
+  color: #3898ec;
+  font-weight: 700;
+}
+
 .form-block {
   margin-top: 40px;
 }
@@ -8,15 +22,31 @@
   font-size: 20px;
 }
 
+.submit_button:hover {
+  background-color: #007be7;
+}
+
 .form_text {
   padding-bottom: 10px;
   font-family: Inconsolata, monospace;
   font-size: 20px;
 }
 
+.form_text.question {
+  margin-top: 0;
+  margin-bottom: 0;
+  padding-bottom: 0;
+  display: flex;
+}
+
 .form_input {
   max-width: 100%;
   border-radius: 5px;
+}
+
+.form_input:hover {
+  background-color: #eee;
+  border: 1px solid #3898ec;
 }
 
 .center_block {
@@ -32,6 +62,80 @@
 .hmtl-embed-site {
   min-height: 200px;
   min-width: 20px;
+}
+
+.rich-text-block {
+  font-family: Inconsolata, monospace;
+  font-size: 16px;
+}
+
+.grid {
+  grid-template-rows: auto auto auto;
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+.paragraph_text {
+  color: #a3a3a3;
+  text-align: center;
+  text-transform: uppercase;
+  font-family: Inconsolata, monospace;
+  font-size: 20px;
+  font-weight: 400;
+}
+
+.grid-2 {
+  grid-template: "Area"
+  / 6.25fr;
+}
+
+.logo_image {
+  max-width: 50%;
+  display: inline-block;
+}
+
+.logo_grid {
+  grid-column-gap: 16px;
+  grid-row-gap: 0px;
+  grid-template-rows: auto;
+  grid-template-columns: 1fr;
+  grid-auto-columns: 1fr;
+  align-content: stretch;
+  align-items: start;
+  justify-items: stretch;
+  display: grid;
+}
+
+.question_block {
+  background-color: #eee;
+  border: 1px solid #dbdbdb;
+  border-radius: 5px;
+  justify-content: space-between;
+  margin-top: 20px;
+  margin-bottom: 10px;
+  padding-left: 10px;
+  padding-right: 10px;
+  display: block;
+}
+
+.question_block:hover {
+  border-color: #3898ec;
+}
+
+.question_trigger {
+  justify-content: space-between;
+  display: flex;
+}
+
+.text-block {
+  font-size: 20px;
+}
+
+.arrow {
+  margin-top: 0;
+  margin-bottom: 0;
+  padding-top: 10px;
+  padding-bottom: 0;
+  font-size: 20px;
 }
 
 @media screen and (max-width: 991px) {
@@ -79,6 +183,20 @@
   .center_block {
     align-items: center;
   }
+
+  .rich-text-block {
+    font-size: 14px;
+  }
+}
+
+#w-node-c9d0fd20-c1e6-2686-fdc2-6551203f539f-d6fdac5e {
+  align-self: auto;
+  justify-self: stretch;
+}
+
+#w-node-_79a6b6ca-5fa4-d204-9364-9a690e35cfe4-d6fdac5e {
+  align-self: center;
+  justify-self: center;
 }
 
 

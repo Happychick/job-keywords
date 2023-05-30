@@ -1,23 +1,16 @@
 # Basically the requests package is the one that is able to pull in json data
 import os
+import re
 from collections import Counter
-
-# 3. Start comparing the topics together
-# Import our language packages
-import gensim
-import matplotlib.pyplot as plt
 import pandas as pd
-# 5. Visualization
+import matplotlib.pyplot as plt
 import seaborn as sns
 import spacy
 from nltk.stem.porter import *
-# 1. The API to pull job descriptions
+import gensim
 from serpapi import GoogleSearch
 
 # 4. Aggregation
-
-# Define the pagination
-start = [0, 10, 20, 30]
 
 # Spacy lemmatizer | basically this cuts the words
 # Load core model
@@ -32,8 +25,7 @@ def get_jobs(start, job_title):
     # Create an empty dataframe
     job_data = pd.DataFrame()
 
-    for i in start:
-        num = i
+    for num in start:
         params = {
             "engine": "google_jobs",
             "google_domain": "google.com",
@@ -50,7 +42,6 @@ def get_jobs(start, job_title):
         results = search.get_dict()
 
         # Put results into dataframe
-        print(results)
         jobs = pd.DataFrame.from_dict(results['jobs_results'])
         # Append values to dataframe
         job_data = pd.concat([jobs, job_data], ignore_index=True)
@@ -107,13 +98,14 @@ def find_skills(lemmatize_docs):
     dictionary = gensim.corpora.Dictionary(lemmatize_docs)  # Create dictionary of all tokens
     bow_corpus = [dictionary.doc2bow(doc, allow_update=True) for doc in
                   lemmatize_docs]  # Run a BoW for each tokenized job description
-    id_words = [[(dictionary[id], count) for id, count in line] for line in
+    id_words = [[(dictionary[id_word], count) for id_word, count in line] for line in
                 bow_corpus]  # Convert id to the actual words
     flat_list = [item for sublist in id_words for item in sublist]  # Put all the list together
     combined_list = list(
         Counter(key for key, num in flat_list for idx in range(num)).items())  # Aggregate the value across all lists
-    skills = pd.DataFrame(combined_list, columns=['word', 'occurences']).sort_values(by=['occurences'], ascending=False,
-                                                                                     ignore_index=True)
+    skills = pd.DataFrame(combined_list, columns=['word', 'occurrences']).sort_values(by=['occurrences'],
+                                                                                      ascending=False,
+                                                                                      ignore_index=True)
 
     return skills
 
@@ -128,7 +120,7 @@ def visualize(skills, project_id, bucket_name, gcs_file_name):
     sns.set(font_scale=1.4)
 
     keys = list(skills.word[:15])
-    vals = list(skills.occurences[:15])
+    vals = list(skills.occurrences[:15])
     pal = sns.color_palette("mako", len(vals))
 
     ax.set(xlabel='Skill', ylabel='# of Job Descriptions')
