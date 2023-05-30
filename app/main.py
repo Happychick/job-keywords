@@ -32,6 +32,7 @@ from app.app import (
 # Configuration
 STATIC_DIRECTORY = os.getenv('JK_STATIC_DIR', 'static')
 DOMAIN = os.getenv('JK_DOMAIN', 'http://localhost:8000')
+AUTH_TOKEN = os.getenv('JK_AUTH_TOKEN', None)
 MAX_CACHE_AGE_SECONDS = 43200  # 12 hours
 
 connection = sqlite3.connect("job-keywords.db")
@@ -166,6 +167,65 @@ def save_feedback_record(id, message, ip_address):
         connection.commit()
 
 
+def get_feedback_records():
+    with get_db_cursor() as cursor:
+        cursor.execute(
+            """
+                select id, message, created_at, ip_address from feedback_records
+            """
+        )
+        rows = cursor.fetchall()
+        return [{
+            "id": row[0],
+            "message": row[1],
+            "createdAt": row[2],
+            "ipAddress": row[3]
+        } for row in rows]
+
+
+def get_requests():
+    with get_db_cursor() as cursor:
+        cursor.execute(
+            """
+                select requestId, search_text, skills, created_at, ip_address from requests
+            """
+        )
+        rows = cursor.fetchall()
+        return [{
+            "requestId": row[0],
+            "searchText": row[1],
+            "skills": row[2],
+            "createdAt": row[3],
+            "ipAddress": row[4]
+        } for row in rows]
+
+
+def get_cached_requests():
+    with get_db_cursor() as cursor:
+        cursor.execute(
+            """
+                select search_text, skills, image_url, created_at from cached_requests
+            """
+        )
+        rows = cursor.fetchall()
+        return [{
+            "searchText": row[0],
+            "skills": row[1],
+            "imageUrl": row[2],
+            "createdAt": row[3]
+        } for row in rows]
+
+
+def delete_all_cached_requests():
+    with get_db_cursor() as cursor:
+        cursor.execute(
+            """
+                delete from cached_requests
+            """
+        )
+        connection.commit()
+
+
 def clone_file(src, dst):
     with open(src, 'rb') as file_src:
         with open(dst, 'wb') as file_dst:
@@ -288,7 +348,55 @@ async def create_feedback(body: CreateFeedbackRequest, request: Request):
     return {"id": feedback_id}
 
 
-@app.get("/search/tasks/{task_id}")
+@app.get("/feedback/all")
 @limiter.limit("5/second")
-async def get_search_task(task_id: str, request: Request):
-    return {"task-id": task_id}
+async def get_feedback(request: Request):
+    if AUTH_TOKEN is None:
+        return {"error": "Authentication token is not set"}
+
+    auth = request.headers.get("Authorization")
+    if auth != ("Bearer " + AUTH_TOKEN):
+        return {"error": "Invalid authentication token"}
+
+    return get_feedback_records()
+
+
+@app.get("/requests/all")
+@limiter.limit("5/second")
+async def get_request(request: Request):
+    if AUTH_TOKEN is None:
+        return {"error": "Authentication token is not set"}
+
+    auth = request.headers.get("Authorization")
+    if auth != ("Bearer " + AUTH_TOKEN):
+        return {"error": "Invalid authentication token"}
+
+    return get_requests()
+
+
+@app.get("/cache/all")
+@limiter.limit("5/second")
+async def get_cache(request: Request):
+    if AUTH_TOKEN is None:
+        return {"error": "Authentication token is not set"}
+
+    auth = request.headers.get("Authorization")
+    if auth != ("Bearer " + AUTH_TOKEN):
+        return {"error": "Invalid authentication token"}
+
+    return get_cached_requests()
+
+
+@app.delete("/cache/all")
+@limiter.limit("5/second")
+async def invalidate_cache(request: Request):
+    if AUTH_TOKEN is None:
+        return {"error": "Authentication token is not set"}
+
+    auth = request.headers.get("Authorization")
+    if auth != ("Bearer " + AUTH_TOKEN):
+        return {"error": "Invalid authentication token"}
+
+    delete_all_cached_requests()
+
+    return {"status": "ok"}
