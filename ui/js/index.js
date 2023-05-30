@@ -22,17 +22,26 @@ $(document).ready(function () {
             $("#imageElement").show();
             $("#imageElement").attr("src", data.imageUrl);
 
-            console.log("Skills found", data.skills);
+            $("#skill-list").html(""); // clear the list
+            data.skills.forEach(function (skill, index) { // iterate over the skills
+                if (index > 30) {
+                    return; // show only the first 10 skills
+                }
+                $("#skill-list").append("<div role='listitem' class='w-dyn-item'><b>" + skill.name + "</b>: " + skill.occurrences + "</div>"); // add each skill to the list
+            });
 
             // show/hide the container with the "no items found" message
             if (data.skills.length) {
                 $("#empty-div").hide();
+                $("#skill-list").show();
             } else {
                 $("#empty-div").show();
+                $("#skill-list").hide();
             }
         }).fail(function (data) { // if request fails
-            console.log("error", data);
             $("#imageElement").hide();
+            $("#skill-list").html("");
+            $("#skill-list").hide();
         }).always(function () { // this function will always be executed
             $(".w-lightbox-spinner").hide(); // hide the spinner
         });
