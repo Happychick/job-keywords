@@ -115,6 +115,7 @@ def visualize(skills, project_id, bucket_name, gcs_file_name):
     # Set the plot dimensions
     a4_dims = (20, 9)
     fig, ax = plt.subplots(figsize=a4_dims)
+    fig.set_layout_engine('compressed')
 
     sns.set_theme(style="whitegrid")
     sns.set(font_scale=1.4)
@@ -127,7 +128,6 @@ def visualize(skills, project_id, bucket_name, gcs_file_name):
     ax.set_xticklabels(keys, rotation=30)
     ax = sns.barplot(x=keys, y=vals, palette=pal)
 
-    plt.title('The most frequently mentioned nouns and verbs in job descriptions')
     # Save the plot to a buffer
     # buf = BytesIO()
     plt.savefig(gcs_file_name, format='png', dpi=300, transparent=True)

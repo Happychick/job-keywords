@@ -119,6 +119,7 @@ strong {
 
 .question_block:hover {
   border-color: #3898ec;
+  cursor: pointer;
 }
 
 .question_trigger {
@@ -206,4 +207,22 @@ strong {
   font-weight: 700;
   font-style: italic;
   font-display: swap;
+}
+
+table.skill-table {
+
+}
+
+table.skill-table td, table.skill-table th {
+  padding: 3px 5px;
+  text-align: left;
+}
+
+tr.header > th, tr.header > td {
+  font-weight: normal;
+  border-bottom: 1px solid #ddd;
+}
+
+table.skill-table th {
+  border-right: 1px solid #ddd;
 }

@@ -1,10 +1,13 @@
 import json
 import os
 import uuid
+from datetime import datetime, timezone
 from typing import List
+
 import contextlib
 
 import pandas
+from dateutil.parser import parse
 from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
@@ -15,6 +18,8 @@ from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 
 import sqlite3
+
+from starlette.responses import RedirectResponse
 
 from app.app import (
     find_skills,
@@ -27,6 +32,7 @@ from app.app import (
 # Configuration
 STATIC_DIRECTORY = os.getenv('JK_STATIC_DIR', 'static')
 DOMAIN = os.getenv('JK_DOMAIN', 'http://localhost:8000')
+MAX_CACHE_AGE_SECONDS = 43200  # 12 hours
 
 connection = sqlite3.connect("job-keywords.db")
 
@@ -72,6 +78,16 @@ def create_db_tables():
                 )
             """
         )
+        cursor.execute(
+            """
+                create table if not exists feedback_records (
+                    id TEXT not null primary key, 
+                    message TEXT not null,
+                    ip_address TEXT not null,
+                    created_at not null
+                )
+            """
+        )
         connection.commit()
 
 
@@ -89,6 +105,13 @@ def get_cached_request(search_text):
         row = cursor.fetchone()
         if row is None:
             return None
+
+        created_at = parse(row[2])
+        now = datetime.now(timezone.utc)
+        if (now - created_at).seconds > MAX_CACHE_AGE_SECONDS:
+            delete_cached_request(search_text)
+            return None
+
         return {
             "skills": row[0],
             "imageUrl": row[1],
@@ -101,20 +124,44 @@ def cache_request(search_text, skills, image_url):
         cursor.execute(
             """
                 insert into cached_requests (search_text, skills, image_url, created_at) 
-                values (?, ?, ?, datetime('now'))
+                values (?, ?, ?, ?)
             """,
-            (search_text, skills, image_url)
+            (search_text, skills, image_url, datetime.now(timezone.utc))
         )
         connection.commit()
 
 
-def save_request(request_id, search_text, skills):
+def delete_cached_request(search_text):
     with get_db_cursor() as cursor:
         cursor.execute(
             """
-                insert into requests (requestId, search_text, skills, created_at) values (?, ?, ?, datetime('now'))
+                delete from cached_requests where search_text = ?
             """,
-            (request_id, search_text, skills)
+            (search_text,)
+        )
+        connection.commit()
+
+
+def save_request(request_id, search_text, skills, ip_address):
+    with get_db_cursor() as cursor:
+        cursor.execute(
+            """
+                insert into requests (requestId, search_text, skills, created_at, ip_address) 
+                values (?, ?, ?, ?, ?)
+            """,
+            (request_id, search_text, skills, datetime.now(timezone.utc), ip_address)
+        )
+        connection.commit()
+
+
+def save_feedback_record(id, message, ip_address):
+    with get_db_cursor() as cursor:
+        cursor.execute(
+            """
+                insert into feedback_records (id, message, ip_address, created_at) 
+                values (?, ?, ?, ?)
+            """,
+            (id, message, ip_address, datetime.now(timezone.utc))
         )
         connection.commit()
 
@@ -164,20 +211,29 @@ class CreateSearchTaskResponse(BaseModel):
     skills: List[Skill]
 
 
-@app.get("/")
-@limiter.limit("5/second")
-async def root(request: Request):
-    return {"message": "Hello!"}
+class CreateFeedbackRequest(BaseModel):
+    message: str
+
+
+class CreateFeedbackResponse(BaseModel):
+    id: str
 
 
 def transform_skills(skills):
     return [Skill(name=skill['word'], occurrences=skill['occurrences']) for skill in skills.to_dict('records')]
 
 
+@app.get("/")
+@limiter.limit("5/second")
+async def root(request: Request):
+    return RedirectResponse(url="/static/index.html")
+
+
 @app.post("/search/tasks")
 @limiter.limit("5/second")
 async def create_search_task(body: CreateSearchTaskRequest, request: Request):
     task_id = str(uuid.uuid4())
+    client_ip_address = get_remote_address(request)
 
     job_title = str.strip(body.searchToken)
 
@@ -187,7 +243,7 @@ async def create_search_task(body: CreateSearchTaskRequest, request: Request):
     # check if we have a cached request
     cached_request = get_cached_request(job_title)
     if cached_request is not None:
-        save_request(task_id, job_title, cached_request["skills"])
+        save_request(task_id, job_title, cached_request["skills"], client_ip_address)
 
         clone_file(cached_request["imageUrl"], gcs_file_name)
 
@@ -215,10 +271,21 @@ async def create_search_task(body: CreateSearchTaskRequest, request: Request):
     cache_request(job_title, skills.to_json(), cached_file_name)
     clone_file(gcs_file_name, cached_file_name)
 
-    save_request(task_id, job_title, skills.to_json())
+    save_request(task_id, job_title, skills.to_json(), client_ip_address)
 
     return CreateSearchTaskResponse(uuid=task_id, imageUrl=f"{DOMAIN}/static/{task_id}.png",
                                     skills=skill_list)
+
+
+@app.post("/feedback")
+@limiter.limit("5/second")
+async def create_feedback(body: CreateFeedbackRequest, request: Request):
+    feedback_id = str(uuid.uuid4())
+    client_ip_address = get_remote_address(request)
+
+    save_feedback_record(feedback_id, body.message, client_ip_address)
+
+    return {"id": feedback_id}
 
 
 @app.get("/search/tasks/{task_id}")

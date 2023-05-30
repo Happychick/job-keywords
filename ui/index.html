@@ -1,5 +1,5 @@
 <!DOCTYPE html><!--  This site was created in Webflow. https://www.webflow.com  -->
-<!--  Last Published: Mon May 29 2023 17:19:49 GMT+0000 (Coordinated Universal Time)  -->
+<!--  Last Published: Tue May 30 2023 19:21:25 GMT+0000 (Coordinated Universal Time)  -->
 <html data-wf-page="60cfcb34707f4452d6fdac5e" data-wf-site="60cfcb34707f443628fdac5d">
 <head>
     <meta charset="utf-8">
@@ -28,7 +28,6 @@
     }(window, document);</script>
     <link href="images/favicon.png" rel="shortcut icon" type="image/x-icon">
     <link href="images/favicon.png" rel="apple-touch-icon">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
 </head>
 <body class="body">
 <div class="wf-section">
@@ -53,24 +52,7 @@
                 <div>Oops! Something went wrong while submitting the form.</div>
             </div>
         </div>
-        <div class="w-dyn-list">
-            <div class="w-dyn-empty" id="empty-div" style="display: none">
-                <div>No items found.</div>
-            </div>
-            <div role="list" class="w-dyn-items">
-                <div role="listitem" class="w-dyn-item">
-                    <div class="hmtl-embed-site w-embed w-script">
-                        <img id="imageElement"
-                             src=""
-                             alt="Image from mcom" style="display: none"/>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div id="skill-list" role="list" class="w-dyn-items" style="display: none">
-
-        </div>
-        <div id="dropdown_div" class="question_block">
+        <div id="dropdown_div" class="question_block" style="display: none">
             <div data-w-id="2e2adeef-bdc8-d9a3-cf7d-400b2c00168d" class="question_trigger">
                 <h2 class="form_text question">How can I used these keywords?</h2>
                 <div style="-webkit-transform:translate3d(0, 0, 0) scale3d(1, 1, 1) rotateX(0deg) rotateY(0) rotateZ(0) skew(0, 0);-moz-transform:translate3d(0, 0, 0) scale3d(1, 1, 1) rotateX(0deg) rotateY(0) rotateZ(0) skew(0, 0);-ms-transform:translate3d(0, 0, 0) scale3d(1, 1, 1) rotateX(0deg) rotateY(0) rotateZ(0) skew(0, 0);transform:translate3d(0, 0, 0) scale3d(1, 1, 1) rotateX(0deg) rotateY(0) rotateZ(0) skew(0, 0);transform-style:preserve-3d"
@@ -80,12 +62,13 @@
             <div style="display:none" class="question_content">
                 <div class="rich-text-block w-richtext">
                     <p>Recruiters spend about <strong>15s scanning your resume</strong>. That&#x27;s nothing. Increase
-                        your chances of getting hired by peppering your resume with keywords used in those job
-                        descriptions so recruiters pick your resume from the crowds!</p>
+                        your chances of getting hired by focusing on the skills needed in a job. And how can you
+                        understand what those are? How about understanding the words most often used in job descriptions
+                        for that job! That&#x27;s what the Skill Wizard is. </p>
                 </div>
             </div>
         </div>
-        <div class="question_block">
+        <div class="question_block" style="display: none">
             <div data-w-id="a182070c-6867-864e-9322-43dd673be6e8" class="question_trigger">
                 <h2 class="form_text question">How was this data collected?</h2>
                 <div style="-webkit-transform:translate3d(0, 0, 0) scale3d(1, 1, 1) rotateX(0deg) rotateY(0) rotateZ(0) skew(0, 0);-moz-transform:translate3d(0, 0, 0) scale3d(1, 1, 1) rotateX(0deg) rotateY(0) rotateZ(0) skew(0, 0);-ms-transform:translate3d(0, 0, 0) scale3d(1, 1, 1) rotateX(0deg) rotateY(0) rotateZ(0) skew(0, 0);transform:translate3d(0, 0, 0) scale3d(1, 1, 1) rotateX(0deg) rotateY(0) rotateZ(0) skew(0, 0);transform-style:preserve-3d"
@@ -97,8 +80,58 @@
                     <p>After you type in the job title, our <strong>Skill Wizard scans the text of 100 job
                         descriptions</strong> with that title. Afterwards, we use NLP to find the most popular words
                         used in those job descriptions. The chart shows the number of times these words appears across
-                        those 100 job descriptions. </p>
+                        those 100 job descriptions.</p>
                 </div>
+            </div>
+        </div>
+        <div class="w-dyn-list">
+            <div class="w-dyn-empty" id="empty-div" style="display: none">
+                <div>No items found.</div>
+            </div>
+            <div role="list" class="w-dyn-items" id="not-empty-div" style="display: none">
+                <div role="listitem" class="w-dyn-item">
+                    <div class="hmtl-embed-site w-embed w-script">
+                        <label class="form_text" style="text-align: center;margin-top: 10px;">This chart shows the number of times the word appeared in 100 job descriptions of that job</label>
+                        <a id="imageElementLink" href="" target="_blank">
+                            <img id="imageElement"
+                             src=""
+                             alt="Image from mcom"/>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="skill-list-div" class="form-block w-form" style="display: none">
+            <label class="form_text">Top 30 skills:</label>
+            <table id="skill-list" role="list" class="skill-table">
+
+            </table>
+        </div>
+
+        <div>
+            <div class="w-row">
+                <div class="w-col w-col-1"></div>
+                <div class="w-col w-col-10">
+                    <div class="form-block w-form">
+                        <form id="feedback-form" name="feedback-form" data-name="Feedback Form" class="form">
+                            <label for="feedbackMessage" class="form_text">Have some thoughts 💡, share your feedback</label>
+                            <textarea placeholder="E.g. I loved it so much!" maxlength="5000" id="feedbackMessage" name="feedbackMessage"
+                                                                 data-name="Field"
+                                                                 class="form_input text_area w-input" style="height: 120px;resize: none;"></textarea>
+                            <div class="center_block">
+                                <input type="submit" value="Share!" data-wait="Please wait..."
+                                                             id="submitFeedbackButton" class="submit_button w-button">
+                            </div>
+                        </form>
+                        <div class="w-form-done" id="feedbackSent">
+                            <div>Thank you! Your feedback has been received!</div>
+                        </div>
+                        <div class="w-form-fail" id="feedbackNotSent">
+                            <div>Oops! Something went wrong while submitting the feedback.</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="w-col w-col-1"></div>
             </div>
         </div>
         <div class="w-row">
