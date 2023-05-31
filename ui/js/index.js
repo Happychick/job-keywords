@@ -1,7 +1,7 @@
 var API_DOMAIN = "http://127.0.0.1:8000";
 $(document).ready(function () {
     // make sure the spinner is hidden when the page loads
-    $(".w-lightbox-spinner").hide();
+    $("#spinner-div").hide();
 
     // when the form is submitted
     $('#email-form').submit(function () {
@@ -10,7 +10,7 @@ $(document).ready(function () {
         }
 
         // show the spinner
-        $(".w-lightbox-spinner").show();
+        $("#spinner-div").show();
 
         // make the API call
         $.ajax({
@@ -54,7 +54,8 @@ $(document).ready(function () {
             $("#skill-list").hide();
             $("#skill-list-div").hide();
         }).always(function () { // this function will always be executed
-            $(".w-lightbox-spinner").hide(); // hide the spinner
+            $("#spinner-div").hide(); // hide the spinner
+            $("#feedback-div").show(); // show the feedback form
         });
 
         return false; // prevent the form from submitting
@@ -72,7 +73,8 @@ $(document).ready(function () {
             context: document.body,
             contentType: "application/json",
             data: JSON.stringify({
-                "message": $('#feedbackMessage').val() // Grab the value from the input field
+                "message": $('#feedbackMessage').val(), // Grab the value from the input field
+                "searchText": $('#name-2').val() // Grab the value from the input field
             })
         }).done(function (data) { // if request is successful
             // show the image from response

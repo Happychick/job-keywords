@@ -30,12 +30,13 @@ from app.app import (
 )
 
 # Configuration
-STATIC_DIRECTORY = os.getenv('JK_STATIC_DIR', 'static')
+BASE_DIRECTORY = os.getenv('JK_BASE_DIR', '/opt/mnt')
+STATIC_DIRECTORY = os.path.join(BASE_DIRECTORY, 'static')
 DOMAIN = os.getenv('JK_DOMAIN', 'http://localhost:8000')
 AUTH_TOKEN = os.getenv('JK_AUTH_TOKEN', None)
 MAX_CACHE_AGE_SECONDS = 43200  # 12 hours
 
-connection = sqlite3.connect("job-keywords.db")
+connection = sqlite3.connect(os.path.join(BASE_DIRECTORY, 'job-keywords.db'))
 
 
 def create_static_dir_if_not_exists():
@@ -84,6 +85,7 @@ def create_db_tables():
                 create table if not exists feedback_records (
                     id TEXT not null primary key, 
                     message TEXT not null,
+                    search_text TEXT null,
                     ip_address TEXT not null,
                     created_at not null
                 )
@@ -155,14 +157,14 @@ def save_request(request_id, search_text, skills, ip_address):
         connection.commit()
 
 
-def save_feedback_record(id, message, ip_address):
+def save_feedback_record(feedback_id, message, search_text, ip_address):
     with get_db_cursor() as cursor:
         cursor.execute(
             """
-                insert into feedback_records (id, message, ip_address, created_at) 
-                values (?, ?, ?, ?)
+                insert into feedback_records (id, message, search_text, ip_address, created_at) 
+                values (?, ?, ?, ?, ?)
             """,
-            (id, message, ip_address, datetime.now(timezone.utc))
+            (feedback_id, message, search_text, ip_address, datetime.now(timezone.utc))
         )
         connection.commit()
 
@@ -171,15 +173,16 @@ def get_feedback_records():
     with get_db_cursor() as cursor:
         cursor.execute(
             """
-                select id, message, created_at, ip_address from feedback_records
+                select id, message, search_text, created_at, ip_address from feedback_records
             """
         )
         rows = cursor.fetchall()
         return [{
             "id": row[0],
             "message": row[1],
-            "createdAt": row[2],
-            "ipAddress": row[3]
+            "searchText": row[2],
+            "createdAt": row[3],
+            "ipAddress": row[4]
         } for row in rows]
 
 
@@ -273,6 +276,7 @@ class CreateSearchTaskResponse(BaseModel):
 
 class CreateFeedbackRequest(BaseModel):
     message: str
+    searchText: str
 
 
 class CreateFeedbackResponse(BaseModel):
@@ -281,6 +285,13 @@ class CreateFeedbackResponse(BaseModel):
 
 def transform_skills(skills):
     return [Skill(name=skill['word'], occurrences=skill['occurrences']) for skill in skills.to_dict('records')]
+
+
+def get_real_client_ip(request: Request):
+    if "x-forwarded-for" in request.headers:
+        return request.headers["x-forwarded-for"]
+    else:
+        return request.client.host
 
 
 @app.get("/")
@@ -293,7 +304,7 @@ async def root(request: Request):
 @limiter.limit("5/second")
 async def create_search_task(body: CreateSearchTaskRequest, request: Request):
     task_id = str(uuid.uuid4())
-    client_ip_address = get_remote_address(request)
+    client_ip_address = get_real_client_ip(request)
 
     job_title = str.strip(body.searchToken)
 
@@ -341,9 +352,9 @@ async def create_search_task(body: CreateSearchTaskRequest, request: Request):
 @limiter.limit("5/second")
 async def create_feedback(body: CreateFeedbackRequest, request: Request):
     feedback_id = str(uuid.uuid4())
-    client_ip_address = get_remote_address(request)
+    client_ip_address = get_real_client_ip(request)
 
-    save_feedback_record(feedback_id, body.message, client_ip_address)
+    save_feedback_record(feedback_id, body.message, body.searchText, client_ip_address)
 
     return {"id": feedback_id}
 
